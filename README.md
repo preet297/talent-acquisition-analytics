@@ -36,3 +36,5 @@ Be ready to explain, in your own words:
 - Regenerate the dataset with different numbers/seed so it doesn't look identical to anyone else's version of this project
 - If you have real (anonymized) campus placement or internship recruitment numbers, swap those in — real numbers, even small scale, are always stronger than synthetic ones
 - Add 2-3 lines of your own written "insights" summary at the top of the dashboard — this is what actually gets discussed in interviews
+
+ 

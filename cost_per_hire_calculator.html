@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Cost-per-Hire & Recruitment ROI Calculator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#151C28; --paper:#EAEDF1; --panel:#FFFFFF;
+    --teal:#2A6F6D; --teal-dark:#1D504E; --amber:#C7793C; --rose:#B9483F;
+    --muted:#5E6773; --line:#D7DCE2;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'IBM Plex Sans',sans-serif;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1080px;margin:0 auto;padding:48px 24px 80px;}
+  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal-dark);display:block;margin-bottom:12px;}
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:36px;margin:0 0 10px;letter-spacing:-.01em;}
+  .lede{color:var(--muted);max-width:640px;font-size:14.5px;line-height:1.6;margin:0 0 40px;}
+
+  .layout{display:grid;grid-template-columns:340px 1fr;gap:28px;align-items:start;}
+  @media(max-width:860px){.layout{grid-template-columns:1fr;}}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:22px 22px 8px;}
+  .card h3{font-family:'IBM Plex Sans';font-size:14px;font-weight:600;margin:0 0 4px;}
+  .card .note{font-size:12px;color:var(--muted);margin-bottom:16px;}
+
+  label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px;margin-top:14px;}
+  label:first-of-type{margin-top:0;}
+  input[type=number]{
+    width:100%; padding:8px 10px; border:1px solid var(--line); border-radius:6px;
+    font-family:'JetBrains Mono',monospace; font-size:14px; background:#FAFBFC; color:var(--ink);
+  }
+  input[type=number]:focus{outline:2px solid var(--teal); outline-offset:1px;}
+
+  table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:8px;}
+  th{text-align:left;font-family:'JetBrains Mono',monospace;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600;padding:9px 10px;border-bottom:1px solid var(--line);}
+  td{padding:10px;border-bottom:1px solid #EEF1F4;font-size:13.5px;}
+  tr:last-child td{border-bottom:none;}
+  td.num, th.num{text-align:right;font-family:'JetBrains Mono',monospace;}
+  .best{background:#E1EEEC;}
+  .tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-family:'JetBrains Mono',monospace;background:#E1EEEC;color:var(--teal-dark);}
+  .tag.warn{background:#F5E4D7;color:var(--amber);}
+
+  .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:24px 0;}
+  .kpi{background:var(--panel);padding:18px 20px;}
+  .kpi .v{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:22px;}
+  .kpi .k{font-size:11.5px;color:var(--muted);margin-top:4px;}
+
+  .barwrap{margin-top:18px;}
+  .bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .bar-label{width:110px;font-size:12.5px;text-align:right;flex-shrink:0;}
+  .bar-track{flex:1;background:#EEF1F4;border-radius:4px;height:22px;position:relative;overflow:hidden;}
+  .bar-fill{height:100%;background:linear-gradient(90deg,var(--teal),var(--teal-dark));border-radius:4px;display:flex;align-items:center;padding-left:8px;color:#fff;font-family:'JetBrains Mono',monospace;font-size:11px;white-space:nowrap;}
+
+  .insight{background:#FBF6EF;border:1px solid #EAD9BC;border-radius:8px;padding:14px 16px;font-size:13px;color:#6B4A22;margin-top:20px;line-height:1.55;}
+  .insight b{color:#4A2F0E;}
+  footer{text-align:center;color:var(--muted);font-size:12px;padding-top:40px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="eyebrow">Talent Acquisition · Cost Modeling Tool</span>
+  <h1>Cost-per-Hire & Recruitment ROI Calculator</h1>
+  <p class="lede">Enter your channel costs below — the calculator uses actual hire counts from the 320-candidate dataset to compute cost-per-hire and recommend where to shift budget.</p>
+
+  <div class="layout">
+    <div class="card">
+      <h3>Channel cost inputs (₹ per month)</h3>
+      <div class="note">Adjust to match your real spend</div>
+      <div id="inputs"></div>
+    </div>
+
+    <div>
+      <div class="kpis" id="kpis"></div>
+
+      <div class="card">
+        <h3>Cost-per-hire by channel</h3>
+        <div class="note">Total monthly cost ÷ hires made through that channel</div>
+        <table>
+          <thead><tr><th>Channel</th><th class="num">Hires</th><th class="num">Monthly Cost</th><th class="num">Cost / Hire</th></tr></thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="card" style="margin-top:20px;">
+        <h3>Relative efficiency</h3>
+        <div class="note">Lower cost-per-hire = more efficient channel</div>
+        <div class="barwrap" id="bars"></div>
+      </div>
+
+      <div class="insight" id="insightBox"></div>
+    </div>
+  </div>
+
+  <footer>Hire counts sourced from the 320-candidate recruitment funnel dataset · Adjust cost inputs to match your scenario</footer>
+</div>
+
+<script>
+// Actual joined-hire counts per channel from the dataset
+const HIRES = {
+  "LinkedIn": 10,
+  "Referral": 12,
+  "Naukri": 8,
+  "Indeed": 3,
+  "Campus Drive": 3,
+  "Company Website": 1
+};
+
+// Sensible default monthly cost assumptions (editable)
+const DEFAULT_COST = {
+  "LinkedIn": 45000,
+  "Referral": 18000,
+  "Naukri": 22000,
+  "Indeed": 15000,
+  "Campus Drive": 30000,
+  "Company Website": 5000
+};
+
+const channels = Object.keys(HIRES);
+const inputsEl = document.getElementById('inputs');
+
+inputsEl.innerHTML = channels.map(ch => `
+  <label>${ch} <span style="opacity:.6">(${HIRES[ch]} hires)</span></label>
+  <input type="number" id="cost-${ch.replace(/\s+/g,'')}" value="${DEFAULT_COST[ch]}" min="0" step="500">
+`).join('');
+
+function fmtINR(n){
+  return '₹' + Math.round(n).toLocaleString('en-IN');
+}
+
+function recompute(){
+  const results = channels.map(ch => {
+    const cost = +document.getElementById('cost-'+ch.replace(/\s+/g,'')).value || 0;
+    const hires = HIRES[ch];
+    const cph = hires > 0 ? cost / hires : Infinity;
+    return {ch, cost, hires, cph};
+  });
+
+  const totalCost = results.reduce((a,b)=>a+b.cost,0);
+  const totalHires = results.reduce((a,b)=>a+b.hires,0);
+  const avgCph = totalCost / totalHires;
+  const sorted = [...results].sort((a,b)=>a.cph-b.cph);
+  const best = sorted[0];
+  const worst = sorted[sorted.length-1];
+
+  // KPIs
+  document.getElementById('kpis').innerHTML = `
+    <div class="kpi"><div class="v">${fmtINR(totalCost)}</div><div class="k">Total Monthly Spend</div></div>
+    <div class="kpi"><div class="v">${totalHires}</div><div class="k">Total Hires</div></div>
+    <div class="kpi"><div class="v">${fmtINR(avgCph)}</div><div class="k">Blended Cost-per-Hire</div></div>
+  `;
+
+  // Table
+  document.getElementById('tableBody').innerHTML = results
+    .sort((a,b)=>a.cph-b.cph)
+    .map(r => `
+      <tr class="${r.ch===best.ch ? 'best' : ''}">
+        <td>${r.ch} ${r.ch===best.ch ? '<span class="tag">most efficient</span>' : ''}${r.ch===worst.ch ? '<span class="tag warn">least efficient</span>' : ''}</td>
+        <td class="num">${r.hires}</td>
+        <td class="num">${fmtINR(r.cost)}</td>
+        <td class="num"><b>${fmtINR(r.cph)}</b></td>
+      </tr>
+    `).join('');
+
+  // Bars (inverse scale - lower cost = longer bar for "efficiency")
+  const maxCph = Math.max(...results.map(r=>r.cph).filter(v=>isFinite(v)));
+  document.getElementById('bars').innerHTML = results
+    .sort((a,b)=>a.cph-b.cph)
+    .map(r => {
+      const pct = Math.max(6, 100 - (r.cph/maxCph*100));
+      return `
+        <div class="bar-row">
+          <div class="bar-label">${r.ch}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${pct}%">${fmtINR(r.cph)}</div></div>
+        </div>
+      `;
+    }).join('');
+
+  // Insight
+  const savingsIfShifted = (worst.cph - best.cph) * 1; // per additional hire shifted
+  document.getElementById('insightBox').innerHTML = `
+    <b>Insight:</b> ${best.ch} is currently your most cost-efficient channel at ${fmtINR(best.cph)} per hire,
+    while ${worst.ch} costs ${fmtINR(worst.cph)} per hire — about ${fmtINR(savingsIfShifted)} more per hire.
+    Shifting incremental sourcing budget toward ${best.ch} (e.g. expanding referral incentives or increasing
+    LinkedIn outreach capacity) would lower blended cost-per-hire without increasing total spend.
+  `;
+}
+
+channels.forEach(ch => {
+  document.getElementById('cost-'+ch.replace(/\s+/g,'')).addEventListener('input', recompute);
+});
+recompute();
+</script>
+</body>
+</html>
